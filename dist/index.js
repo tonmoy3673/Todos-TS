@@ -50,6 +50,7 @@ const getTodos = () => __awaiter(void 0, void 0, void 0, function* () {
         }
         // =========== get section =======//
         todos.forEach((todo) => {
+            var _a;
             const newDev = document.createElement("div");
             if (newDev) {
                 newDev.style.textAlign = "center";
@@ -65,6 +66,9 @@ const getTodos = () => __awaiter(void 0, void 0, void 0, function* () {
         
         `;
             mainContainer === null || mainContainer === void 0 ? void 0 : mainContainer.appendChild(newDev);
+            const statusButton = (_a = document.getElementById(`status-btn-${todo.id}`)) === null || _a === void 0 ? void 0 : _a.addEventListener(('click'), () => __awaiter(void 0, void 0, void 0, function* () {
+                console.log('clicked');
+            }));
             console.log(todo);
         });
     }

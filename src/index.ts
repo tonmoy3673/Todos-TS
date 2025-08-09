@@ -61,6 +61,7 @@ const getTodos = async (): Promise<void> => {
         newDev.style.borderRadius = "6px";
         newDev.style.height = "150px";
       }
+     
 
       newDev.innerHTML = `
             <h4>ID : ${todo.id}</h4>
@@ -69,6 +70,11 @@ const getTodos = async (): Promise<void> => {
         
         `;
       mainContainer?.appendChild(newDev);
+
+      const statusButton = document.getElementById(`status-btn-${todo.id}`)?.addEventListener(('click'),async()=>{
+        console.log('clicked');
+      })
+
       console.log(todo);
     });
   } catch (err: unknown) {
