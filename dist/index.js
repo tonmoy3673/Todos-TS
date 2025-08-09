@@ -12,78 +12,15 @@ const loadTodos = () => {
     return fetch("https://jsonplaceholder.typicode.com/todos")
         .then((res) => {
         if (!res.ok) {
-            throw new Error("Network Error Found ");
+            throw new Error("Network Error Found");
         }
-        else {
-            return res.json();
-        }
-    })
-        .then((data) => {
-        return data;
+        return res.json();
     })
         .catch((err) => {
-        if (err instanceof Error) {
-            console.error(`Todos data not Fetch ${err.message}`);
-            throw new Error(`Todos not Fetch ${err.message}`);
-        }
-        else {
-            console.error("Data Not Found");
-        }
+        console.error('Fetch error:', err);
+        throw err;
     });
 };
-//  ================ Get Todos ===========//
-const getTodos = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const todos = yield loadTodos();
-        if (!todos) {
-            throw new Error("Data Not Found");
-        }
-        const mainContainer = document.getElementById("main-container");
-        const todoDetails = document.getElementById('todo-detail');
-        if (mainContainer) {
-            mainContainer.style.display = "grid";
-            mainContainer.style.gridTemplateColumns = "repeat(4,1fr)";
-            mainContainer.style.gap = "20px";
-            mainContainer.style.justifyContent = "center";
-            mainContainer.style.alignItems = "center";
-            mainContainer.style.padding = "15px 10px";
-        }
-        // =========== get section =======//
-        todos.forEach((todo) => {
-            var _a;
-            const newDev = document.createElement("div");
-            if (newDev) {
-                newDev.style.textAlign = "center";
-                newDev.style.border = "1px solid gray";
-                newDev.style.padding = "10px";
-                newDev.style.borderRadius = "6px";
-                newDev.style.height = "150px";
-            }
-            newDev.innerHTML = `
-            <h4>ID : ${todo.id}</h4>
-            <p>Title : ${todo.title}</p>
-            <button id="status-btn-${todo.id}">Status</button>
-        
-        `;
-            mainContainer === null || mainContainer === void 0 ? void 0 : mainContainer.appendChild(newDev);
-            const statusButton = (_a = document.getElementById(`status-btn-${todo.id}`)) === null || _a === void 0 ? void 0 : _a.addEventListener(('click'), () => __awaiter(void 0, void 0, void 0, function* () {
-                console.log('clicked');
-            }));
-            console.log(todo);
-        });
-    }
-    catch (err) {
-        if (err instanceof Error) {
-            console.error(`Data not Fetch ${err.message}`);
-            throw new Error(`Data Not Fetch ${err.message}`);
-        }
-        else {
-            console.log("Unknown Error Occurred!!");
-        }
-    }
-    finally {
-    }
-});
 // ============== Get TodosByID ========//
 const getTodosById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -91,24 +28,90 @@ const getTodosById = (id) => __awaiter(void 0, void 0, void 0, function* () {
         if (!res.ok) {
             throw new Error('API Issue Found!');
         }
-        else {
-            const data = yield res.json();
-            console.log(data);
-        }
+        return yield res.json();
     }
     catch (err) {
-        if (err instanceof Error) {
-            console.error(`Data Not Fetch ${err.message}`);
-            throw new Error(`Data Not Fetch ${err.message}`);
-        }
-        else {
-            throw new Error('Unknown Error Occurred!!');
-        }
+        console.error(`Error fetching todo ${id}:`, err);
+        throw err;
     }
-    finally {
+});
+// ================ Get Todos ===========//
+const getTodos = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Check if elements exist
+        const mainContainer = document.getElementById("main-container");
+        const todoDetails = document.getElementById('todo-detail');
+        if (!mainContainer || !todoDetails) {
+            throw new Error("Required DOM elements not found");
+        }
+        const todos = yield loadTodos();
+        console.log('Todos loaded:', todos.length);
+        // Style containers
+        mainContainer.style.display = "grid";
+        mainContainer.style.gridTemplateColumns = "repeat(4,1fr)";
+        mainContainer.style.gap = "20px";
+        mainContainer.style.padding = "15px 10px";
+        // Initial details message
+        todoDetails.innerHTML = "<p>Click a todo to see details</p>";
+        todoDetails.style.marginTop = "20px";
+        todoDetails.style.padding = "10px";
+        todoDetails.style.border = "1px solid #333";
+        // Create todo cards
+        todos.forEach((todo) => {
+            const newDiv = document.createElement("div");
+            newDiv.style.textAlign = "center";
+            newDiv.style.border = "1px solid gray";
+            newDiv.style.padding = "10px";
+            newDiv.style.borderRadius = "6px";
+            newDiv.style.height = "150px";
+            newDiv.innerHTML = `
+        <h4>ID: ${todo.id}</h4>
+        <p>Title: ${todo.title}</p>
+        <button class="status-btn" data-id="${todo.id}">Status</button>
+      `;
+            // Add click handler
+            const button = newDiv.querySelector('.status-btn');
+            button.addEventListener('click', (e) => __awaiter(void 0, void 0, void 0, function* () {
+                e.preventDefault();
+                try {
+                    todoDetails.innerHTML = '<p>Loading...</p>';
+                    const data = yield getTodosById(todo.id);
+                    todoDetails.innerHTML = `
+            <h3>Todo Details</h3>
+            <p><strong>ID:</strong> ${data.id}</p>
+            <p><strong>User ID:</strong> ${data.userId}</p>
+            <p><strong>Title:</strong> ${data.title}</p>
+            <p><strong>Status:</strong> 
+              <span style="color:${data.completed ? 'green' : 'red'}">
+                ${data.completed ? "Completed" : "Pending"}
+              </span>
+            </p>
+          `;
+                }
+                catch (err) {
+                    console.error('Error in click handler:', err);
+                    todoDetails.innerHTML = `
+            <p style="color:red">Error loading details</p>
+          `;
+                }
+            }));
+            mainContainer.appendChild(newDiv);
+        });
+    }
+    catch (err) {
+        console.error('Error in getTodos:', err);
+        const errorContainer = document.getElementById("main-container") || document.body;
+        errorContainer.innerHTML = `
+      <div style="color:red; padding:20px;">
+        <h2>Error Loading Todos</h2>
+        <p>${err instanceof Error ? err.message : 'Unknown error'}</p>
+      </div>
+    `;
     }
 });
 // ======== Call the Function ===========//
-getTodos();
+document.addEventListener('DOMContentLoaded', () => {
+    getTodos();
+});
 export {};
 //# sourceMappingURL=index.js.map

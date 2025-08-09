@@ -1,9 +1,15 @@
-/* #main-container{
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    align-items: center;
-    justify-content: center !important;
-    margin: 0 auto;
-    gap: 15px;
 
-} */
+#main-container > div {
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+#main-container > div:hover {
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+#todo-detail {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #333;
+  min-height: 120px;
+  text-align: center;
+}
